@@ -4,8 +4,15 @@ import com.n0dwis.encodebook.Notebook;
 import com.n0dwis.encodebook.NotebookEventListener;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class MainFrame extends JFrame implements NotebookEventListener {
 
@@ -18,6 +25,9 @@ public class MainFrame extends JFrame implements NotebookEventListener {
 
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
+
+        JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        contentPane.add(sp, BorderLayout.CENTER);
 
         setPreferredSize(new Dimension(600, 400));
 
@@ -65,13 +75,19 @@ public class MainFrame extends JFrame implements NotebookEventListener {
     public void processNotebookEven(int eventType, Notebook notebook) {
         Container contentPane = getContentPane();
         if (eventType == NOTEBOOK_OPENED) {
-            notes = new JTree();
-            editor = new JEditorPane();
-
-            JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+            notes = createNotebookTree(notebook);
+            JSplitPane sp = (JSplitPane)contentPane.getComponent(0);
             sp.setLeftComponent(notes);
-            sp.setRightComponent(editor);
+
             contentPane.add(sp, BorderLayout.CENTER);
+            revalidate();
+        }
+
+        if (eventType == FILE_OPENED) {
+            JTextArea editor = new JTextArea();
+            JSplitPane sp = (JSplitPane)contentPane.getComponent(0);
+            sp.setRightComponent(editor);
+            editor.setText(notebook.getCurrentContent());
             revalidate();
         }
 
@@ -79,5 +95,29 @@ public class MainFrame extends JFrame implements NotebookEventListener {
             contentPane.remove(0);
             revalidate();
         }
+    }
+
+    private JTree createNotebookTree(final Notebook notebook) {
+        JTree tree = new JTree(new NotebookTree(notebook));
+
+        TreeSelectionModel selModel = new DefaultTreeSelectionModel();
+        selModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        tree.setSelectionModel(selModel);
+
+        TreeSelectionListener l = new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
+                NotesNode node = (NotesNode)treeSelectionEvent.getNewLeadSelectionPath().getLastPathComponent();
+                if (!node.isNote()) {
+                    return;
+                }
+
+                notebook.openNote(node.getFile());
+            }
+        };
+
+        tree.addTreeSelectionListener(l);
+
+        return tree;
     }
 }

@@ -1,8 +1,11 @@
 package com.n0dwis.encodebook;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Notebook {
@@ -25,41 +28,43 @@ public class Notebook {
     }
 
 
-    private File _notebookPath;
+    private File _notebookDirectory;
+    private File _currentFile;
+    private String _currentContent;
 
     public Notebook(File notebookDirectory) {
-        _notebookPath = notebookDirectory;
+        _notebookDirectory = notebookDirectory;
     }
 
+
+    public File getNotebookDirectory() {
+        return _notebookDirectory;
+    }
+
+    public void openNote(File file) {
+        _currentFile = file;
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            _currentContent = "";
+            while (br.ready()) {
+                _currentContent += br.readLine();
+            }
+            fireEvent(NotebookEventListener.FILE_OPENED);
+        } catch (Exception e) {
+            _currentFile = null;
+            _currentContent = null;
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public String getCurrentContent() {
+        return _currentContent;
+    }
 
     public void close() {
         _instance = null;
         fireEvent(NotebookEventListener.NOTEBOOK_OPENED);
-    }
-
-
-    public List<Note> getNotesList() {
-        ArrayList<Note> notesList = new ArrayList<>();
-        _recursiveBuildFilesList(_notebookPath, notesList);
-        return notesList;
-    }
-
-
-    private void _recursiveBuildFilesList(File parent, List<Note> notesList) {
-        try {
-            File[] filesList = parent.listFiles();
-//            Arrays.sort(filesList, );
-            for (File curFile : filesList) {
-                if (curFile.isDirectory()) {
-                    _recursiveBuildFilesList(curFile, notesList);
-                } else {
-                    notesList.add(new Note(curFile));
-                }
-            }
-        } catch (SecurityException e) {
-            return;
-        }
-
     }
 
     private static void fireEvent(int eventType) {
