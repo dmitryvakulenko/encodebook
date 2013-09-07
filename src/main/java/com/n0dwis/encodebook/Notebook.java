@@ -29,8 +29,7 @@ public class Notebook {
 
 
     private File _notebookDirectory;
-    private File _currentFile;
-    private String _currentContent;
+    private Note _currentNote;
 
     public Notebook(File notebookDirectory) {
         _notebookDirectory = notebookDirectory;
@@ -42,24 +41,12 @@ public class Notebook {
     }
 
     public void openNote(File file) {
-        _currentFile = file;
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            _currentContent = "";
-            while (br.ready()) {
-                _currentContent += br.readLine();
-            }
-            fireEvent(NotebookEventListener.FILE_OPENED);
-        } catch (Exception e) {
-            _currentFile = null;
-            _currentContent = null;
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        _currentNote = new Note(file);
+        fireEvent(NotebookEventListener.FILE_OPENED);
     }
 
-    public String getCurrentContent() {
-        return _currentContent;
+    public Note getCurrentNote() {
+        return _currentNote;
     }
 
     public void close() {

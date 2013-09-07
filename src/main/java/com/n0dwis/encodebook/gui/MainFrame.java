@@ -2,17 +2,17 @@ package com.n0dwis.encodebook.gui;
 
 import com.n0dwis.encodebook.Notebook;
 import com.n0dwis.encodebook.NotebookEventListener;
+import com.n0dwis.encodebook.gui.actions.OpenNoteAction;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 public class MainFrame extends JFrame implements NotebookEventListener {
 
@@ -87,7 +87,11 @@ public class MainFrame extends JFrame implements NotebookEventListener {
             splitter.remove(2);
             JTextArea editor = new JTextArea();
             splitter.setRightComponent(editor);
-            editor.setText(notebook.getCurrentContent());
+            DefaultStyledDocument doc = new DefaultStyledDocument();
+            doc.putProperty(DefaultEditorKit.EndOfLineStringProperty, "\n");
+            editor.setDocument(doc);
+            OpenNoteAction action = new OpenNoteAction(editor);
+            action.doAction(notebook.getCurrentNote());
             splitter.setDividerLocation(location);
             splitter.resetToPreferredSizes();
         }
