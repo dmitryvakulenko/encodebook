@@ -16,6 +16,7 @@ import java.awt.event.MouseListener;
 
 public class MainFrame extends JFrame implements NotebookEventListener {
 
+    JSplitPane splitter = null;
     JTree notes = null;
     JEditorPane editor = null;
 
@@ -26,8 +27,8 @@ public class MainFrame extends JFrame implements NotebookEventListener {
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 
-        JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        contentPane.add(sp, BorderLayout.CENTER);
+        splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        contentPane.add(splitter, BorderLayout.CENTER);
 
         setPreferredSize(new Dimension(600, 400));
 
@@ -73,26 +74,27 @@ public class MainFrame extends JFrame implements NotebookEventListener {
 
     @Override
     public void processNotebookEven(int eventType, Notebook notebook) {
-        Container contentPane = getContentPane();
         if (eventType == NOTEBOOK_OPENED) {
             notes = createNotebookTree(notebook);
-            JSplitPane sp = (JSplitPane)contentPane.getComponent(0);
-            sp.setLeftComponent(notes);
-
-            contentPane.add(sp, BorderLayout.CENTER);
-            revalidate();
+            notes.setPreferredSize(new Dimension(200, 0));
+            splitter.setLeftComponent(notes);
+            splitter.setRightComponent(new JPanel());
+            splitter.resetToPreferredSizes();
         }
 
         if (eventType == FILE_OPENED) {
+            int location = splitter.getDividerLocation();
+            splitter.remove(2);
             JTextArea editor = new JTextArea();
-            JSplitPane sp = (JSplitPane)contentPane.getComponent(0);
-            sp.setRightComponent(editor);
+            splitter.setRightComponent(editor);
             editor.setText(notebook.getCurrentContent());
-            revalidate();
+            splitter.setDividerLocation(location);
+            splitter.resetToPreferredSizes();
         }
 
         if (eventType == NOTEBOOK_CLOSED) {
-            contentPane.remove(0);
+            splitter.remove(1);
+            splitter.remove(2);
             revalidate();
         }
     }
