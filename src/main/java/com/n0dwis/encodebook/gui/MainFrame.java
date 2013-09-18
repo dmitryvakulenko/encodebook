@@ -1,8 +1,11 @@
 package com.n0dwis.encodebook.gui;
 
+import com.n0dwis.encodebook.Encodebook;
 import com.n0dwis.encodebook.Notebook;
 import com.n0dwis.encodebook.NotebookEventListener;
+import com.n0dwis.encodebook.gui.actions.ExitAction;
 import com.n0dwis.encodebook.gui.actions.OpenNoteAction;
+import com.n0dwis.encodebook.gui.actions.OpenNoteBookAction;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -28,6 +31,7 @@ public class MainFrame extends JFrame implements NotebookEventListener {
         contentPane.setLayout(new BorderLayout());
 
         splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        Encodebook.presenter = new NotebookPresenter(splitter);
         contentPane.add(splitter, BorderLayout.CENTER);
 
         setPreferredSize(new Dimension(600, 400));
@@ -42,27 +46,10 @@ public class MainFrame extends JFrame implements NotebookEventListener {
         mainMenu.add(fileMenu);
 
         JMenuItem openNotebook = new JMenuItem();
-        openNotebook.setAction(new AbstractAction("Open notebook") {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                final JFileChooser fc = new JFileChooser();
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                Component component = (Component) actionEvent.getSource();
-                JFrame frame = (JFrame) SwingUtilities.getRoot(component);
-                fc.showOpenDialog(frame);
-                Notebook.open(fc.getSelectedFile());
-            }
-        });
+        openNotebook.setAction(new OpenNoteBookAction());
 
         JMenuItem exit = new JMenuItem();
-        exit.setAction(new AbstractAction("Exit") {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Frame mainFrame = Frame.getFrames()[0];
-                mainFrame.setVisible(false);
-                mainFrame.dispose();
-            }
-        });
+        exit.setAction(new ExitAction());
 
         fileMenu.add(openNotebook);
         fileMenu.add(new JMenuItem("Close notebook"));
@@ -74,14 +61,6 @@ public class MainFrame extends JFrame implements NotebookEventListener {
 
     @Override
     public void processNotebookEven(int eventType, Notebook notebook) {
-        if (eventType == NOTEBOOK_OPENED) {
-            notes = createNotebookTree(notebook);
-            notes.setPreferredSize(new Dimension(200, 0));
-            splitter.setLeftComponent(notes);
-            splitter.setRightComponent(new JPanel());
-            splitter.resetToPreferredSizes();
-        }
-
         if (eventType == FILE_OPENED) {
             int location = splitter.getDividerLocation();
             splitter.remove(2);
@@ -101,29 +80,5 @@ public class MainFrame extends JFrame implements NotebookEventListener {
             splitter.remove(2);
             revalidate();
         }
-    }
-
-    private JTree createNotebookTree(final Notebook notebook) {
-        JTree tree = new JTree(new NotebookTree(notebook));
-
-        TreeSelectionModel selModel = new DefaultTreeSelectionModel();
-        selModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        tree.setSelectionModel(selModel);
-
-        TreeSelectionListener l = new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
-                NotesNode node = (NotesNode)treeSelectionEvent.getNewLeadSelectionPath().getLastPathComponent();
-                if (!node.isNote()) {
-                    return;
-                }
-
-                notebook.openNote(node.getFile());
-            }
-        };
-
-        tree.addTreeSelectionListener(l);
-
-        return tree;
     }
 }

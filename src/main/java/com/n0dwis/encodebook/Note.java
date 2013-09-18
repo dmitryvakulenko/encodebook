@@ -13,6 +13,14 @@ public class Note {
         _noteFile = noteFile;
     }
 
+    public String getName() {
+        return _noteFile.getName();
+    }
+
+    public boolean isContainer() {
+        return _noteFile.isDirectory();
+    }
+
     // TODO it will be better to throw something like NotException here
     public BufferedReader getReader() throws FileNotFoundException {
         return new BufferedReader(new FileReader(_noteFile));

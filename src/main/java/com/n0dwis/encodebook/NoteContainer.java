@@ -4,11 +4,17 @@ import java.io.File;
 
 public class NoteContainer {
 
-    private File _directory;
+    private File _noteFile;
 
-    public NoteContainer(File dir) {
-        _directory = dir;
+    public NoteContainer(File noteFile) {
+        _noteFile = noteFile;
     }
 
+    public String getName() {
+        return _noteFile.getName();
+    }
 
+    public boolean isContainer() {
+        return true;
+    }
 }

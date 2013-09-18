@@ -1,6 +1,8 @@
 package com.n0dwis.encodebook.gui;
 
 
+import com.n0dwis.encodebook.Note;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,26 +10,26 @@ import java.util.Comparator;
 
 public class NotesNode {
 
-    private File _file;
+    private Note _note;
 
     private ArrayList<NotesNode> _childNotesList = new ArrayList<>();
 
-    public NotesNode(File file) {
-        _file = file;
+    public NotesNode(Note note) {
+        _note = note;
     }
 
     @Override
     public String toString() {
-        return _file.getName();
+        return _note.getName();
     }
 
 
-    public File getFile() {
-        return _file;
+    public Note getNote() {
+        return _note;
     }
 
     public boolean isNote() {
-        return _file.isFile();
+        return _note.isContainer();
     }
 
     public NotesNode getChildNodeByIndex(int index) {
@@ -36,7 +38,7 @@ public class NotesNode {
 
     public int getChildNotesCount() {
         if (isNote()) {
-            throw new RuntimeException("Note " + _file.getName() + " haven't children.");
+            throw new RuntimeException("Note " + _note.getName() + " haven't children.");
         }
 
         return _childNotesList.size();
@@ -52,7 +54,7 @@ public class NotesNode {
             return;
         }
 
-        File[] childFiles = _file.listFiles();
+        File[] childFiles = _note.listFiles();
         Arrays.sort(childFiles, new Comparator<File>() {
             @Override
             public int compare(File file, File file2) {

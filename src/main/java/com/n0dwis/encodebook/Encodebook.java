@@ -1,12 +1,15 @@
 package com.n0dwis.encodebook;
 
 import com.n0dwis.encodebook.gui.MainFrame;
+import com.n0dwis.encodebook.gui.NotebookPresenter;
 
 import javax.swing.*;
 
 public class Encodebook {
 
     private MainFrame _mainFrame;
+
+    public static NotebookPresenter presenter = null;
 
     Encodebook(final String[] args) {
         _mainFrame = new MainFrame();
